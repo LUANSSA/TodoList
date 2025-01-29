@@ -17,6 +17,11 @@ from flet import(
 
 
 def main(page: Page):
+    page.title = "Tarefas"
+    page.horizontal_alignment = "center"
+    page.scroll = "adaptive"
+    page.update()
+    
     pass
 
 
