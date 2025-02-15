@@ -6,8 +6,11 @@ class CheckBox(ft.Row):
 
     def __init__(self, text):
         super().__init__()
-        self.text_view = ft.Text(text)
+        # CheckBox
+        self.checkbox = ft.Checkbox(label=text)
         self.text_edit = ft.TextField(text, visible=False)
+
+
         # Botão editar
         self.edit_button = ft.IconButton(icon=ft.icons.EDIT, on_click=self.edit)
         # Botão salvar
@@ -16,9 +19,9 @@ class CheckBox(ft.Row):
         self.delete_button = ft.IconButton(icon=ft.icons.DELETE,icon_color="red", on_click=self.delete)
 
         self.controls = [
-            ft.Checkbox(),
-            self.text_view,
+            self.checkbox,
             self.text_edit,
+            # Botoes
             self.edit_button,
             self.save_button,
             self.delete_button
@@ -30,7 +33,7 @@ class CheckBox(ft.Row):
         self.save_button.visible=True
         self.delete_button.visible=False
         self.text_edit.visible=True
-        self.text_view.visible=False
+        self.checkbox.visible=False
         self.update()
         pass
     def save(self, event):
@@ -38,8 +41,8 @@ class CheckBox(ft.Row):
         self.save_button.visible=False
         self.delete_button.visible=True
         self.text_edit.visible=False
-        self.text_view.visible=True
-        self.text_view.value = self.text_edit.value
+        self.checkbox.visible=True
+        self.checkbox.label = self.text_edit.value
         self.update()
         pass
     def delete(self, event):

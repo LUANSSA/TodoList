@@ -14,12 +14,12 @@ class Tarefa(ft.Column):
         # Excluir tarefa
         self.tarefa_delete=tarefa_delete
 
-        def build(self):
-            self.tarefa_display=ft.Checkbox(
-                value=False,
-                label=self.tarefa_nome,
-                on_change=self.tarefa_estado
-            )
+    def build(self):
+        self.tarefa_display=ft.Checkbox(
+            value=False,
+            label=self.tarefa_nome,
+            on_change=self.tarefa_estado
+        )
 
         # Editar tarefa
         self.editar_nome=ft.TextField(expand=True, on_submit=self.salvar)
