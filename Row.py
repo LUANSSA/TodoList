@@ -21,8 +21,8 @@ def main(page: ft.Page):
         ],
         # Permite que os itens quebrem para uma nova linha
         wrap=True,
-        # Espaço entre os elementos da lista da Row
-        run_spacing=20
+        # Define o espaço entre as "linhas" quando os elementos quebram para uma nova linha (quando wrap=True está ativado
+        run_spacing=40
     )
 
     # Segunda Linha
