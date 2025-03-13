@@ -1,224 +1,236 @@
 import flet as ft
 
-
 # Classe para criar tarefas
-class Tarefa(ft.Column):
-    def __init__(self, tarefa_nome, tarefa_estado, tarefa_delete):
+class Task(ft.Column):
+    def __init__(self, task_name,task_status_change, task_delete):
         super().__init__()
-        # Completa
-        self.completa=False
-        # Nome
-        self.tarefa_nome=tarefa_nome
-        # Estado da tarefa
-        self.tarefa_estado=tarefa_estado
-        # Excluir tarefa
-        self.tarefa_delete=tarefa_delete
+        self.completed=False
+        self.task_name=task_name
+        self.task_stattus_change=task_status_change
+        self.task_delete=task_delete
 
     def build(self):
-        self.tarefa_display=ft.Checkbox(
+        self.display_task=ft.Checkbox(
             value=False,
-            label=self.tarefa_nome,
-            on_change=self.tarefa_estado
+            label=self.task_name,
+            on_change=self.status_change,
         )
 
-        # Editar tarefa
-        self.editar_nome=ft.TextField(expand=True, on_submit=self.salvar)
+        self.edit_name=ft.TextField(expand=1,on_submit=self.save_clicked)
 
-        # View tarefa - Linha da tarefa
-        self.tarefa_view=ft.Row(
+        self.display_view=ft.Row(
             controls=[
-                # Tarefa checkbox
-                self.tarefa_display,
-                # Tarefa ações
+                self.display_task,
                 ft.Row(
                     controls=[
-                        # Botão de editar tarefa
+                        # Editar tarefa
                         ft.IconButton(
                             icon=ft.Icons.CREATE_OUTLINED,
                             icon_color=ft.Colors.GREEN,
                             tooltip="Editar tarefa",
-                            on_click=self.editar
+                            on_click=self.edit_clicked,
                         ),
-                        # Botão de excluir tarefa
+                        # Deletar tarefa
                         ft.IconButton(
                             icon=ft.Icons.DELETE_OUTLINED,
                             icon_color=ft.Colors.RED,
                             tooltip="Deletar tarefa",
-                            on_click=self.deletar
+                            on_click=self.delete_clicked,
                         )
-                    ]
+                    ],
+                    alignment="right"
                 )
             ]
         )
 
-        self.editar_view = ft.Row(
+        self.edit_view=ft.Row(
             visible=False,
             controls=[
-                self.editar_nome,
+                self.edit_name,
                 ft.IconButton(
                     icon=ft.Icons.DONE_OUTLINE_OUTLINED,
-                    icon_colors=ft.Colors.GREEN,
+                    icon_color=ft.Colors.GREEN,
                     tooltip="Atualizar tarefa",
-                    on_click=self.salvar
+                    on_click=self.save_clicked
                 )
             ]
         )
 
         return ft.Column(
             controls=[
-                self.tarefa_view,
-                self.editar_view
-
+                self.display_view, self.edit_view,
             ]
         )
 
-    # Salvar tarefa
-    def salvar(self, event):
-        self.tarefa_display.label = self.editar_nome.value
-        self.tarefa_view.visible=False
-        self.editar_view.visible=False
+
+    def save_clicked(self, event):
+        self.display_task.label=self.edit_name.value
+        self.display_view.visible=True
+        self.edit_view.visible=False
         self.update()
-
-    # Editar tarefa
-    def editar(self, event):
-        self.editar_nome.value = self.tarefa_display.label
-        self.editar_nome.focus()
-        self.tarefa_view.visible=False
-        self.editar_view.visible=True
+        pass
+    def edit_clicked(self, event):
+        self.edit_name.value=self.display_task.label
+        self.display_view.visible=False
+        self.edit_view.visible=True
         self.update()
+        pass
+    def delete_clicked(self, event):
+        self.task_delete(self)
+        pass
+    def status_change(self, event):
+        self.completed=self.display_task.value
+        self.task_stattus_change(self)
+        pass
+    pass
 
-    # Deletar tarefa
-    def deletar(self, event):
-        self.tarefa_delete(self)
-
-    # Estado da tarefa
-    def tarefa_status(self):
-        self.completa = self.mudanca_de_guia.value
-        self.tarefa_estado(self)
-        self.update()
-
-    
-    
-
-# Classe para criar o aplicativo
+# Classe para criar aplicativo
 class TodoApp(ft.Column):
-
     def build(self):
-        self.nova_tarefa = ft.TextField(
+        self.new_task=ft.TextField(
             hint_text="Qual tarefa precisa ser feita?",
             expand=True,
-            on_submit=self.adicionar_tarefa,
+            on_submit=self.add_task
         )
 
+        self.tasks=ft.Column()
 
-        # Tarefa
-        self.tarefas = ft.Column()
-
-        # Filtro de tarefas - Navegação
-        self.filtro = ft.Tabs(
+        self.filter=ft.Tabs(
             scrollable=False,
             selected_index=0,
-            on_change=self.mudanca_de_guia,
+            on_change=self.tabs_changed,
             tabs=[
                 ft.Tab(text="Todas"),
-                ft.Tab(text="Ativas"),
+                ft.Tab(text="A Fazer"),
                 ft.Tab(text="Concluídas"),
             ]
         )
 
-        self.itens_esquerda = ft.Text("0 tarefas adicionadas")
+        self.itens_left=ft.Text("0 tarefas adicionadas")
 
-        # Retorno
+        self.button_clear = ft.OutlinedButton(
+            text="Apagar todas a tarefas concluídas".upper(),
+            on_click=self.clear_completed_tasks,
+            disabled = True
+        )
+
         return ft.Column(
             controls=[
-                # Título da aplicação
+                # Titulo da Aplicação
                 ft.Row(
                     controls=[
-                        ft.Text(value="Tarefas", size=50, weight="bold", color=ft.Colors.with_opacity(0.7, "black"))
+                        ft.Text(value="Tarefas", size=40, weight="bold",color=ft.Colors.with_opacity(0.7, "black"))
                     ],
-                    alignment="center",
+                    alignment="center"
                 ),
-                # Inserção de tarefas
+                # Adicionar tarefa
                 ft.Row(
                     controls=[
-                        self.nova_tarefa,
-                        ft.FloatingActionButton(icon=ft.Icons.ADD, on_click=self.adicionar_tarefa)
+                        self.new_task,
+                        ft.FloatingActionButton(icon=ft.Icons.ADD, on_click=self.add_task)
                     ]
                 ),
-                # Lista de Tarefas
+                # Filtro de tarefas
                 ft.Column(
                     controls=[
-                        # Filtro de tarefas
-                        self.filtro,
-                        # Lista de tarefas
-                        self.tarefas,
+                        self.filter,
+                        self.tasks,
                         ft.Row(
-                            controls=[
-                                # Mensagem de 0 tarefas concluídas
-                                self.itens_esquerda,
-                                # Botão que apaga tarefas concluídas
-                                ft.OutlinedButton(
-                                    text="Apagar todas as tarefas concluídas".upper(),
-                                    on_click=self.apagar_tarefas_concluidas
-                                )
-                            ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            vertical_alignment=ft.CrossAxisAlignment.CENTER
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                self.itens_left,
+                                self.button_clear,
+                            ]
                         )
                     ]
-                ),
+                )
             ]
         )
 
-
-    # Mudança de guia
-    def mudanca_de_guia(self, event):
+    # Navegação de tarefas
+    def tabs_changed(self, event):
         self.update()
-        pass
 
-    # Adicionar tarefa
-    def adicionar_tarefa(self, event):
-        if self.nova_tarefa.value:
-            tarefa=Tarefa(self.nova_tarefa.value, self.tarefa_estado, self.tarefa_delete)
-            self.tarefas.controls.append(tarefa)
-            self.nova_tarefa.value=""
-            self.nova_tarefa.focus()
+    # Adiconar tarefa
+    def add_task(self, event):
+        if self.new_task.value:
+            task=Task(self.new_task.value, self.task_status_chage, self.task_delete)
+            self.tasks.controls.append(task)
+            self.new_task.value=""
+            self.new_task.focus()
             self.update()
         pass
 
-    # Apagar todas as taredas concluídas
-    def apagar_tarefas_concluidas(self, event):
+    # Apagar tarefas concluídas
+    def clear_completed_tasks(self, event):
+        for task in self.tasks.controls[:]:
+            if task.completed:
+                self.task_delete(task)
         pass
 
-    def tarefa_estado(self, tarefa):
+    def task_status_chage(self, task):
         self.update()
+        pass
 
-    def tarefa_delete(self, tarefa):
-        self.tarefas.controls.remove(tarefa)
+    def task_delete(self, task):
+        self.tasks.controls.remove(task)
         self.update()
+        pass
 
-# Função principal
+    def before_update(self):
+        
+        status = self.filter.tabs[self.filter.selected_index].text
+        count=0
+        task_complete = 0
+
+        for task in self.tasks.controls[:]:
+
+            task.visible = (
+                status == "Todas"
+                or (status == "A Fazer" and task.completed == False)
+                or (status == "Concluídas" and task.completed == True)
+            )
+            
+            if not task.completed:
+                count+=1
+
+            print(task_complete)
+
+            if task.completed:
+                task_complete += 1
+                print(task_complete)
+                print(self.tasks.controls)
+                print(len(self.tasks.controls))
+
+                if task_complete == len(self.tasks.controls):
+                    self.button_clear.disabled = False
+                elif task_complete != len(self.tasks.controls):
+                    self.button_clear.disabled = False
+                else:
+                    self.button_clear.disabled = False
+            else:
+                self.button_clear.disabled = True
+
+        self.itens_left.value=f"{count} tarefa(s) não concluídas"
+        
+        super().before_update()
+
+
+
 def main(page: ft.Page):
-    # Titulo
     page.title="Minhas Tarefas"
-    # Largunta da tela
-    page.window.width=500
-    # Altura da tela
+    page.window.width=550
     page.window.height=650
-    # Tema da página
-    page.theme_mode = ft.ThemeMode.LIGHT
-    # Alinhamento dos itens na tela
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-
-    # Atualizar página
+    page.horizontal_alignment=ft.CrossAxisAlignment.CENTER
+    page.padding=ft.padding.only(top=20,bottom=20,left=20,right=20)
+    page.theme_mode=ft.ThemeMode.LIGHT
+    page.scroll=ft.ScrollMode.ADAPTIVE
     page.update()
 
-    # Todo List
     app = TodoApp()
 
-    page.add(
-        app
-    )
+    page.add(app)
 
 
 ft.app(target=main)
